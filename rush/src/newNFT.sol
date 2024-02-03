@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "./IERC721.sol";
 import "./IERC721Metadata.sol";
 
-abstract contract Contract is IERC721 {
+abstract contract Contract is IERC721 {   
     mapping(address => uint256) internal _balances;
 
     mapping(uint256 => address) internal _owners;
