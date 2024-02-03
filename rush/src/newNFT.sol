@@ -23,4 +23,25 @@ abstract contract Contract is IERC721 {
         require(owner != address(0), "TokenID does not exist");
         return owner;
     }
+
+    function setApprovalForAll(address operator, bool approved) public override {
+        _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
+    }
+
+    function isApprovedForAll(address owner, address operator) public view override returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
+
+    function approve(address to, uint256 tokenId) public override {
+        address owner = ownerOf(tokenId);
+        require( msg.sender == owner || isApprovedForAll(owner, msg.sender), "Msg.sender is not the owner or an approved operator");
+        _tokenApprovals[tokenId] = to;
+        emit Approval(owner, to, tokenId);
+    }
+
+    function getApproved(uint256 tokenId) public view override returns (address) {
+        require(_owners[tokenId] != address(0), "Token ID does not exist");
+        return _tokenApprovals[tokenId];
+    }
 }
