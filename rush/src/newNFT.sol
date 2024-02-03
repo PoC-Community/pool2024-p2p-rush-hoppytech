@@ -44,4 +44,24 @@ abstract contract Contract is IERC721 {
         require(_owners[tokenId] != address(0), "Token ID does not exist");
         return _tokenApprovals[tokenId];
     }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override {
+        address owner = ownerOf(tokenId);
+        require(
+            msg.sender == owner ||
+            getApproved(tokenId) == msg.sender ||
+            isApprovedForAll(owner, msg.sender),
+            "Msg.sender is not the owner or approved for transfer"
+        );
+        require(owner == from, "From address is not the owner");
+        require(to != address(0), "Address is zero");
+        require(_owners[tokenId] != address(0), "TokenID does not exist");
+        approve(address(0), tokenId);
+
+        _balances[from] -= 1;
+        _balances[to] += 1;
+        _owners[tokenId] = to;
+
+        emit Transfer(from, to, tokenId);
+    }
 }
