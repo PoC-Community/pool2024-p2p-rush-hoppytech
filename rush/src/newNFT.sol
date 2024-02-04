@@ -3,8 +3,20 @@ pragma solidity ^0.8.20;
 
 import "./IERC721.sol";
 import "./IERC721Metadata.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract Contract is IERC721 {   
+abstract contract Contract is IERC721 {
+    uint256 public minPrice = 0.001 ether;
+
+    uint256 public totalSupply;
+
+    uint256 public maxSupply;
+
+    bool public isMintEnabled;
+
+    mapping(address => uint256) public mintedWallets;
+
     mapping(address => uint256) internal _balances;
 
     mapping(uint256 => address) internal _owners;
@@ -63,5 +75,29 @@ abstract contract Contract is IERC721 {
         _owners[tokenId] = to;
 
         emit Transfer(from, to, tokenId);
+    }
+
+    constructor() payable ERC721("Test_Mint", "Test") {
+        maxSupply = 2;
+    }
+
+    function checkIsMintEnabled() external onlyOwner {
+        isMintEnabled = !isMintEnabled;
+    }
+
+    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
+        maxSupply = _maxSupply;
+    }
+
+    function mint() external payable {
+        require(isMintEnabled, "Please active your mint");
+        require(mintedWallets[msg.sender] < 1, "don't exceed wallet_max");
+        require(msg.value == mintPrice, "That's not the fixed price");
+        reqire(maxSupply > totalSupply, "No stock");
+    
+        mintedWallets[msg.sender]++;
+        totalSupply++;
+        uint256 tokenId = totalSupply;
+        _safeMint(msg.sender, tokenId);
     }
 }
